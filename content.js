@@ -17,3 +17,6 @@ function sendLinksToBackground(links) {
 // content script 시작
 const links = extractLinks();
 sendLinksToBackground(links);
+
+// 백그라운드 스크립트에 데이터를 전달
+chrome.runtime.sendMessage({ action: 'updateLinks', links });

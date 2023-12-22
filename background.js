@@ -1,16 +1,23 @@
-// 초기화: 저장소 초기화
 chrome.runtime.onInstalled.addListener(function () {
     chrome.storage.local.set({ linkTree: [] });
   });
-  
-  // 링크 정보 업데이트 핸들러
-  chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+
+let storedLinks = [];
+
+// 링크 정보 업데이트 핸들러
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if(chrome.storage && chrome.storage.local)
+  {
     if (request.action === 'updateLinks') {
-      const newLinks = request.links;
-      chrome.storage.local.get('linkTree', function (data) {
-        const existingLinks = data.linkTree || [];
-        const updatedLinks = [...existingLinks, { parent: null, children: newLinks }];
-        chrome.storage.local.set({ linkTree: updatedLinks });
-      });
+      storedLinks = request.links;
+      chrome.runtime.sendMessage({ action: 'getLinks', links: storedLinks }); 
+    } else if (request.action === 'getLinks') {
+      sendResponse({ links: storedLinks });
     }
-  });
+  } else {
+    console.log("chrome.storage.local is not available");
+  }   
+});
+
+// content script에 연결
+chrome.runtime.connectNative('content-script');
